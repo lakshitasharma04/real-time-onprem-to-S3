@@ -71,6 +71,39 @@ On-prem data generation → Local folders → AWS CLI sync → Amazon S3 bucket
 &nbsp;  ```bash
 
 &nbsp;  aws configure
+Provide your Access Key, Secret Key, region, and output format when prompted.
+
+Create required AWS resources:
+
+An EC2 Launch Template with the provided user-data script
+
+An Application Load Balancer (ALB)
+
+An Auto Scaling Group (ASG) attached to the ALB target group
+
+These resources can be created via the AWS Management Console or Infrastructure-as-Code tools.
+
+Verify the Auto Scaling setup:
+
+Navigate to the EC2 Auto Scaling Groups console
+
+Confirm that instances are launching successfully
+
+Ensure instances are registered as healthy targets behind the ALB
+
+Access the application:
+
+Copy the ALB DNS name from the EC2 → Load Balancers section
+
+Open the DNS name in a web browser
+
+You should see a response showing:
+
+Instance ID
+
+Hostname
+
+Refreshing the page multiple times demonstrates load balancing across instances.
 
 
 
