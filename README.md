@@ -1,103 +1,121 @@
-\# Real-Time On-Prem to Amazon S3 Data Ingestion
+Overview
 
+This project demonstrates a scalable and highly available web application architecture on AWS using EC2 Auto Scaling Groups and an Application Load Balancer (ALB).
 
+EC2 instances are automatically launched using a Launch Template and bootstrapped with a user-data script that installs NGINX and securely retrieves instance metadata using IMDSv2. Incoming traffic is distributed across instances via an internet-facing ALB, demonstrating load balancing and horizontal scaling.
 
-\## Overview
+Refreshing the ALB DNS endpoint shows responses from different EC2 instances, proving traffic distribution.
 
-This project demonstrates a real-time on-premise data ingestion pipeline that continuously generates enterprise-like operational data (audit logs, inventory updates, and transaction records) and streams them to Amazon S3 using the AWS CLI.
+Architecture Components
 
+Amazon EC2 instances running Ubuntu
 
+EC2 Launch Template
 
-The goal is to simulate how organizations migrate live operational data from on-prem systems to cloud storage for analytics, auditing, and archival purposes.
+Auto Scaling Group (minimum 1, maximum 2 instances)
 
+Application Load Balancer (ALB)
 
+ALB Target Group
 
----
+NGINX web server
 
+IMDSv2 for secure instance metadata access
 
+User-Data Script
 
-\## Architecture
+EC2 instances are bootstrapped using a user-data script that:
 
-On-premise system (simulated using local file system and Python scripts) generates data at regular intervals.  
+Updates the system packages
 
-The generated data is organized into domain-specific folders:
+Installs NGINX
 
-\- `audit/` – system and compliance logs  
+Enables and starts the NGINX service
 
-\- `inventory/` – stock and inventory updates  
+Retrieves instance metadata using IMDSv2
 
-\- `transactions/` – order and transaction records  
+Displays the Instance ID and Hostname on the default web page
 
+Script location in the repository:
 
+user-data/ubuntu-nginx-imdsv2.sh
 
-A scheduled AWS CLI sync process uploads new files in near real time to Amazon S3, preserving folder structure.
+Prerequisites
 
+An active AWS account
 
+IAM user or role with permissions for:
 
-\*\*Flow:\*\*
+EC2
 
-On-prem data generation → Local folders → AWS CLI sync → Amazon S3 bucket
+Auto Scaling
 
+Elastic Load Balancing
 
+AWS CLI installed and configured
 
----
+Basic understanding of EC2, ALB, and Auto Scaling concepts
 
+How to Run
+Step 1: Configure AWS CLI
 
+Configure the AWS CLI with your credentials, region, and preferred output format.
 
-\## Implementation Details
+You will need to provide:
 
-\- \*\*Data Generation:\*\*  
+Access Key
 
-&nbsp; A Python script continuously generates SAP-like business records every fixed interval (30 seconds).
+Secret Key
 
-\- \*\*Streaming Mechanism:\*\*  
+AWS region
 
-&nbsp; The `aws s3 sync` command is used to push newly generated files to S3, simulating real-time ingestion.
+Output format
 
-\- \*\*Cloud Storage:\*\*  
+Step 2: Create Required AWS Resources
 
-&nbsp; Amazon S3 stores incoming data under structured prefixes (`audit/`, `inventory/`, `transactions/`) for downstream analytics.
+Create the following resources using the AWS Management Console or Infrastructure-as-Code tools:
 
+EC2 Launch Template
 
+Use an Ubuntu AMI
 
----
+Instance type: t2.micro (free-tier eligible)
 
+Attach the provided user-data script
 
+Application Load Balancer
 
-\## How to Run
+Internet-facing
 
-1\. Configure AWS CLI with IAM credentials:
+Listener on port 80
 
-&nbsp;  ```bash
+Target group configured for EC2 instances
 
-&nbsp;  aws configure
-Provide your Access Key, Secret Key, region, and output format when prompted.
+Auto Scaling Group
 
-Create required AWS resources:
+Attach to the ALB target group
 
-An EC2 Launch Template with the provided user-data script
+Desired capacity: 1
 
-An Application Load Balancer (ALB)
+Minimum capacity: 1
 
-An Auto Scaling Group (ASG) attached to the ALB target group
+Maximum capacity: 2
 
-These resources can be created via the AWS Management Console or Infrastructure-as-Code tools.
-
-Verify the Auto Scaling setup:
+Step 3: Verify Auto Scaling
 
 Navigate to the EC2 Auto Scaling Groups console
 
 Confirm that instances are launching successfully
 
-Ensure instances are registered as healthy targets behind the ALB
+Ensure instances are marked healthy in the ALB target group
 
-Access the application:
+Step 4: Access the Application
 
 Copy the ALB DNS name from the EC2 → Load Balancers section
 
 Open the DNS name in a web browser
 
-You should see a response showing:
+The page will display:
 
 Instance ID
 
@@ -105,5 +123,18 @@ Hostname
 
 Refreshing the page multiple times demonstrates load balancing across instances.
 
+What This Project Demonstrates
 
+EC2 Auto Scaling for high availability
 
+Load balancing using Application Load Balancer
+
+Secure use of IMDSv2
+
+Automated instance bootstrapping with user-data
+
+Real-world AWS infrastructure design principles
+
+Notes
+
+This project focuses on architecture, scalability, and AWS best practices rather than application logic. It is designed to reflect production-style cloud infrastructure commonly used in real-world environments.
